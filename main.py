@@ -48,7 +48,7 @@ def fetch_instructors():
     instructors = instructors_response['data']['instructors']['list']
     return {instructor['id']: instructor['name'] for instructor in instructors}
 
-def format_schedule(items, instructor_map, instructor_name_filter):
+def format_schedule(items, instructor_map, instructor_name_filter, date_filter):
     schedule_info = {}
     for item in items:
         instructor_name = instructor_map.get(item['instructor_id'], '不明')
@@ -64,9 +64,16 @@ def format_schedule(items, instructor_map, instructor_name_filter):
         schedule_info[date].append(lesson_info)
     
     formatted_schedule = []
-    for date, lessons in schedule_info.items():
-        formatted_schedule.append(f"- {date}")
-        formatted_schedule.extend(lessons)
+
+    if date_filter:
+        for date, lessons in schedule_info.items():
+            if date == date_filter:
+                formatted_schedule.append(f"- {date}")
+                formatted_schedule.extend(lessons)
+    else: 
+        for date, lessons in schedule_info.items():
+            formatted_schedule.append(f"- {date}")
+            formatted_schedule.extend(lessons)
     
     return formatted_schedule
 
@@ -76,24 +83,32 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    instructor_name_filter = None
+    date_filter = None
+
     if message.content.startswith('!schedule'):
         logging.info(f"Received message: {message.content}")
         parts = message.content.split()
         instructor_name_filter = parts[1] if len(parts) > 1 else None
+        date_filter = parts[2] if len(parts) > 2 else None
+        await execute(message, instructor_name_filter, date_filter)
     elif message.content.startswith('大竹神'):
         logging.info(f"Received message: {message.content}")
         instructor_name_filter = '大竹'
+        await execute(message, instructor_name_filter, date_filter)
 
-        today = datetime.today().strftime('%Y-%m-%d')
-        items = fetch_schedule(today)
-        instructor_map = fetch_instructors()
-        formatted_schedule = format_schedule(items, instructor_map, instructor_name_filter)
-        
-        try:
-            await message.reply('>>> ' + '\n'.join(formatted_schedule)[0:3000])
-            logging.info("Message replied successfully")
-        except Exception as e:
-            logging.error(f"Failed to reply to message: {e}")
+
+async def execute(message, instructor_name_filter, date_filter):
+    today = datetime.today().strftime('%Y-%m-%d')
+    items = fetch_schedule(today)
+    instructor_map = fetch_instructors()
+    formatted_schedule = format_schedule(items, instructor_map, instructor_name_filter, date_filter)
+    
+    try:
+        await message.reply('>>> ' + '\n'.join(formatted_schedule)[0:3000])
+        logging.info("Message replied successfully")
+    except Exception as e:
+        logging.error(f"Failed to reply to message: {e}")
 
 keep_alive()
 bot.run(TOKEN)
