@@ -3,4 +3,3 @@ datetime
 flask
 discord.py
 python-dotenv
-logging
