@@ -1,11 +1,13 @@
-from flask import Flask
+from flask import Flask, request
 from threading import Thread
 
 app = Flask("")
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "HEAD"])
 def home():
+    if request.method == "HEAD":
+        app.logger.info("HEAD request received")
     return "I'm alive"
 
 
