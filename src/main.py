@@ -110,5 +110,6 @@ async def execute(message, instructor_name_filter, date_filter):
     except Exception as e:
         logging.error(f"Failed to reply to message: {e}")
 
-keep_alive()
-bot.run(TOKEN)
+if __name__ == '__main__':
+    keep_alive()
+    bot.run(TOKEN)
