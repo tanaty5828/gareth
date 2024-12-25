@@ -136,7 +136,7 @@ async def execute(message, instructor_name_filter, date_filter):
 
 
 # Send Otake's schedule to the channel by specified scheduled times
-@tasks.loop(times=scheduled_times)
+@tasks.loop(time=scheduled_times)
 async def scheduled_message():
     logging.info("Running scheduled message")
     today = datetime.today().strftime("%Y-%m-%d")
