@@ -27,7 +27,10 @@ jobs:
         pip install -r requirements.txt
 
     - name: Set environment variables
-      run: echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> $GITHUB_ENV
+      run: | 
+        echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> $GITHUB_ENV
+        echo "SCHEDULE_URL=https://example.com" >> $GITHUB_ENV
+        echo "INSTRUCTORS_URL=https://example.com" >> $GITHUB_ENV
     - name: Run tests
       run: |
         python -m unittest discover -s src -p "test_main.py"
