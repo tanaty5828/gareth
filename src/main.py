@@ -1,6 +1,6 @@
 import logging
-from discord.ext import commands
-from datetime import datetime
+from discord.ext import commands, tasks
+from datetime import datetime, timezone, timedelta, time
 import discord
 import requests
 import os
@@ -23,6 +23,14 @@ bot = commands.Bot(
     case_insensitive=True,  # コマンドの大文字小文字を区別しない ($hello も $Hello も同じ!)
     intents=intents,  # 権限を設定
 )
+
+JST = timezone(timedelta(hours=+9), "JST")
+
+scheduled_times = [
+    time(hour=10, tzinfo=JST),
+    time(hour=12, tzinfo=JST),
+    time(hour=16, tzinfo=JST),
+]
 
 
 def get_reservation_emoji(count):
@@ -82,11 +90,16 @@ def format_schedule(items, instructor_map, instructor_name_filter, date_filter):
             formatted_schedule.append(f"- {date}")
             formatted_schedule.extend(lessons)
 
+    if len(formatted_schedule) == 0:
+        formatted_schedule.append(
+            "😌 There are no available lessions for this condistions"
+        )
     return formatted_schedule
 
 
 @bot.event
 async def on_ready():
+    scheduled_message.start()
     print("Bot is ready!")
 
 
@@ -120,6 +133,26 @@ async def execute(message, instructor_name_filter, date_filter):
         logging.info("Message replied successfully")
     except Exception as e:
         logging.error(f"Failed to reply to message: {e}")
+
+
+# Send Otake's schedule to the channel by specified scheduled times
+@tasks.loop(time=scheduled_times)
+async def scheduled_message():
+    logging.info("Running scheduled message")
+    today = datetime.today().strftime("%Y-%m-%d")
+    items = fetch_schedule(today)
+    instructor_map = fetch_instructors()
+    formatted_schedule = format_schedule(items, instructor_map, "大竹", today)
+
+    channel = bot.get_channel(int(os.getenv("CHANNEL_ID")))
+    try:
+        message_header = "** Alert for O-take's schedule today: **\n"
+        await channel.send(
+            message_header + ">>> " + "\n".join(formatted_schedule)[0:3000]
+        )
+        logging.info("Scheduled message sent successfully")
+    except Exception as e:
+        logging.error(f"Failed to send scheduled message: {e}")
 
 
 if __name__ == "__main__":
