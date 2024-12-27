@@ -1,5 +1,6 @@
 import logging
 from discord.ext import commands, tasks
+from discord import app_commands
 from datetime import datetime, timezone, timedelta, time
 import discord
 import requests
@@ -92,35 +93,41 @@ def format_schedule(items, instructor_map, instructor_name_filter, date_filter):
 
     if len(formatted_schedule) == 0:
         formatted_schedule.append(
-            "😌 There are no available lessions for this condistions"
+            "😌 There are no available lessons for this conditions"
         )
     return formatted_schedule
 
 
 @bot.event
 async def on_ready():
+    await bot.tree.sync()
     scheduled_message.start()
     print("Bot is ready!")
 
 
-@bot.event
-async def on_message(message):
-    instructor_name_filter = None
-    date_filter = None
-
-    if message.content.startswith("!schedule"):
-        logging.info(f"Received message: {message.content}")
-        parts = message.content.split()
-        instructor_name_filter = parts[1] if len(parts) > 1 else None
-        date_filter = parts[2] if len(parts) > 2 else None
-        await execute(message, instructor_name_filter, date_filter)
-    elif message.content.startswith("大竹神"):
-        logging.info(f"Received message: {message.content}")
-        instructor_name_filter = "大竹"
-        await execute(message, instructor_name_filter, date_filter)
+@bot.tree.command(
+    name="schedule",
+    description="Get joy+ schedule, Usage: /schedule [instructor_name] [date]",
+)
+@app_commands.describe(
+    instructor_name="Instructor name to filter", date="Date to filter (YYYY-MM-DD)"
+)
+async def schedule(
+    interaction: discord.Interaction, instructor_name: str = None, date: str = None
+):
+    logging.info(f"Received command: /schedule {instructor_name} {date}")
+    await execute(interaction, instructor_name, date)
 
 
-async def execute(message, instructor_name_filter, date_filter):
+@bot.tree.command(name="otake", description="Get GOD OF OTAKE schedule, Usage: /otake")
+async def schedule(
+    interaction: discord.Interaction, instructor_name: str = None, date: str = None
+):
+    logging.info(f"Received command: /otake")
+    await execute(interaction, "大竹", date)
+
+
+async def execute(interaction, instructor_name_filter, date_filter):
     today = datetime.today().strftime("%Y-%m-%d")
     items = fetch_schedule(today)
     instructor_map = fetch_instructors()
@@ -129,7 +136,9 @@ async def execute(message, instructor_name_filter, date_filter):
     )
 
     try:
-        await message.reply(">>> " + "\n".join(formatted_schedule)[0:3000])
+        await interaction.response.send_message(
+            ">>> " + "\n".join(formatted_schedule)[0:2000]
+        )
         logging.info("Message replied successfully")
     except Exception as e:
         logging.error(f"Failed to reply to message: {e}")
@@ -148,7 +157,7 @@ async def scheduled_message():
     try:
         message_header = "** Alert for O-take's schedule today: **\n"
         await channel.send(
-            message_header + ">>> " + "\n".join(formatted_schedule)[0:3000]
+            message_header + ">>> " + "\n".join(formatted_schedule)[0:2000]
         )
         logging.info("Scheduled message sent successfully")
     except Exception as e:
