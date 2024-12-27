@@ -73,6 +73,59 @@ class TestMain(unittest.TestCase):
         self.assertIn("- 2023-10-01", result)
         self.assertIn("  - 10:00 - 11:00 Instructor A 🟡🟡", result)
 
+    def test_format_schedule_with_instructor_filter(self):
+        items = [
+            {
+                "instructor_id": 1,
+                "start_at": "2023-10-01T10:00:00",
+                "end_at": "2023-10-01T11:00:00",
+                "date": "2023-10-01",
+                "reservation_count": 2,
+            },
+            {
+                "instructor_id": 2,
+                "start_at": "2023-10-01T12:00:00",
+                "end_at": "2023-10-01T13:00:00",
+                "date": "2023-10-01",
+                "reservation_count": 3,
+            }
+        ]
+        instructor_map = {1: "Instructor A", 2: "Instructor B"}
+        result = format_schedule(items, instructor_map, "Instructor A", None)
+        self.assertIn("- 2023-10-01", result)
+        self.assertIn("  - 10:00 - 11:00 Instructor A 🟡🟡", result)
+        self.assertNotIn("  - 12:00 - 13:00 Instructor B 🟡🟡🟡", result)
+
+    def test_format_schedule_with_date_filter(self):
+        items = [
+            {
+                "instructor_id": 1,
+                "start_at": "2023-10-01T10:00:00",
+                "end_at": "2023-10-01T11:00:00",
+                "date": "2023-10-01",
+                "reservation_count": 2,
+            },
+            {
+                "instructor_id": 2,
+                "start_at": "2023-10-02T12:00:00",
+                "end_at": "2023-10-02T13:00:00",
+                "date": "2023-10-02",
+                "reservation_count": 3,
+            }
+        ]
+        instructor_map = {1: "Instructor A", 2: "Instructor B"}
+        result = format_schedule(items, instructor_map, None, "2023-10-01")
+        self.assertIn("- 2023-10-01", result)
+        self.assertIn("  - 10:00 - 11:00 Instructor A 🟡🟡", result)
+        self.assertNotIn("- 2023-10-02", result)
+        self.assertNotIn("  - 12:00 - 13:00 Instructor B 🟡🟡🟡", result)
+
+    def test_format_schedule_with_no_lessons(self):
+        items = []
+        instructor_map = {}
+        result = format_schedule(items, instructor_map, None, None)
+        self.assertIn("😌 There are no available lessons for this conditions", result)
+
     def test_get_reservation_emoji(self):
         self.assertEqual(get_reservation_emoji(0), "⛳️")
         self.assertEqual(get_reservation_emoji(1), "🟢")
