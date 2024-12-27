@@ -1,4 +1,5 @@
 import logging
+import random
 from discord.ext import commands, tasks
 from discord import app_commands
 from datetime import datetime, timezone, timedelta, time
@@ -106,11 +107,34 @@ async def on_ready():
 
 
 @bot.tree.command(
+    name="ootakebible",
+    description="get joy+ schedule, usage: /schedule [instructor_name] [date]",
+)
+async def otakebible(interaction: discord.Interaction):
+    otake_quotes = [
+        "クラブヘッドに仕事をさせてください",
+        "もっと強く叩いてください",
+        "クラブを引っ張ってください",
+        "シャフトが柔らかいです",
+        "振り子です",
+        "ドライバーのシャフトバランスが悪いです",
+        "ドライバーは3倍くらいフェース返していいです",
+        "人差し指でグリップを受け止めてください",
+    ]
+    channel = bot.get_channel(int(os.getenv("CHANNEL_ID")))
+    quote = random.choice(otake_quotes)
+    try:
+        await channel.send(">>> 大竹「" + quote + "」")
+    except Exception as e:
+        logging.error(f"Failed to reply to message: {e}")
+
+
+@bot.tree.command(
     name="schedule",
-    description="Get joy+ schedule, Usage: /schedule [instructor_name] [date]",
+    description="get joy+ schedule, usage: /schedule [instructor_name] [date]",
 )
 @app_commands.describe(
-    instructor_name="Instructor name to filter", date="Date to filter (YYYY-MM-DD)"
+    instructor_name="instructor name to filter", date="date to filter (yyyy-mm-dd)"
 )
 async def schedule(
     interaction: discord.Interaction, instructor_name: str = None, date: str = None
@@ -120,9 +144,8 @@ async def schedule(
 
 
 @bot.tree.command(name="otake", description="Get GOD OF OTAKE schedule, Usage: /otake")
-async def schedule(
-    interaction: discord.Interaction, instructor_name: str = None, date: str = None
-):
+@app_commands.describe(date="date to filter (yyyy-mm-dd)")
+async def otake_schedule(interaction: discord.Interaction, date: str = None):
     logging.info(f"Received command: /otake")
     await execute(interaction, "大竹", date)
 
