@@ -121,7 +121,6 @@ async def otakebible(interaction: discord.Interaction):
         "ドライバーは3倍くらいフェース返していいです",
         "人差し指でグリップを受け止めてください",
     ]
-    channel = bot.get_channel(int(os.getenv("CHANNEL_ID")))
     quote = random.choice(otake_quotes)
     try:
         await interaction.response.send_message(">>> 大竹「" + quote + "」")
@@ -147,7 +146,7 @@ async def schedule(
 @bot.tree.command(name="otake", description="Get GOD OF OTAKE schedule, Usage: /otake")
 @app_commands.describe(date="date to filter (yyyy-mm-dd)")
 async def otake_schedule(interaction: discord.Interaction, date: str = None):
-    logging.info(f"Received command: /otake")
+    logging.info("Received command: /otake")
     await execute(interaction, "大竹", date)
 
 
