@@ -107,8 +107,8 @@ async def on_ready():
 
 
 @bot.tree.command(
-    name="ootakebible",
-    description="get joy+ schedule, usage: /schedule [instructor_name] [date]",
+    name="otakebible",
+    description="Send a random quote from Otake, usage: /otakebible",
 )
 async def otakebible(interaction: discord.Interaction):
     otake_quotes = [
