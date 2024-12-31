@@ -8,6 +8,29 @@ import requests
 import os
 from keep_alive import keep_alive
 from dotenv import load_dotenv
+from typing import Mapping, Optional
+
+
+class MyHelpCommand(commands.HelpCommand):
+
+    def __init__(self):
+        super().__init__(
+            show_hidden=False,
+            command_attrs={"brief": "ヘルプを表示"},
+        )
+
+    async def send_bot_help(
+        self, mapping: Mapping[Optional[commands.Cog], list[commands.Command]]
+    ) -> None:
+        e = discord.Embed(title="help", description="Usage: /help [command]")
+
+        cmds = mapping[None]
+
+        for command in await self.filter_commands(cmds):  # 隠しコマンドを除外
+            e.add_field(name=command.name, value=f"> {command.brief}", inline=False)
+
+        await self.get_destination().send(embed=e)  # ヘルプメッセージを送信
+
 
 load_dotenv()
 intents = discord.Intents.default()
@@ -21,9 +44,10 @@ INSTRUCTORS_URL = os.getenv("INSTRUCTORS_URL")
 logging.basicConfig(level=logging.INFO)
 
 bot = commands.Bot(
-    command_prefix="$",  # $コマンド名　でコマンドを実行できるようになる
-    case_insensitive=True,  # コマンドの大文字小文字を区別しない ($hello も $Hello も同じ!)
+    command_prefix="$",
+    case_insensitive=True,
     intents=intents,  # 権限を設定
+    help_command=MyHelpCommand(),
 )
 
 JST = timezone(timedelta(hours=+9), "JST")
