@@ -124,7 +124,8 @@ async def otakebible(interaction: discord.Interaction):
     channel = bot.get_channel(int(os.getenv("CHANNEL_ID")))
     quote = random.choice(otake_quotes)
     try:
-        await channel.send(">>> 大竹「" + quote + "」")
+        await interaction.response.send_message(">>> 大竹「" + quote + "」")
+        logging.info("Message posted successfully")
     except Exception as e:
         logging.error(f"Failed to reply to message: {e}")
 
