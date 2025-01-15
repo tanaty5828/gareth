@@ -70,7 +70,7 @@ class TestMain(unittest.TestCase):
         ]
         instructor_map = {1: "Instructor A"}
         result = format_schedule(items, instructor_map, None, None)
-        self.assertIn("- 2023-10-01", result)
+        self.assertIn("- 2023-10-01 (Sun)", result)
         self.assertIn("  - 10:00 - 11:00 Instructor A 🟡🟡", result)
 
     def test_format_schedule_with_instructor_filter(self):
@@ -92,7 +92,7 @@ class TestMain(unittest.TestCase):
         ]
         instructor_map = {1: "Instructor A", 2: "Instructor B"}
         result = format_schedule(items, instructor_map, "Instructor A", None)
-        self.assertIn("- 2023-10-01", result)
+        self.assertIn("- 2023-10-01 (Sun)", result)
         self.assertIn("  - 10:00 - 11:00 Instructor A 🟡🟡", result)
         self.assertNotIn("  - 12:00 - 13:00 Instructor B 🟡🟡🟡", result)
 
@@ -115,9 +115,9 @@ class TestMain(unittest.TestCase):
         ]
         instructor_map = {1: "Instructor A", 2: "Instructor B"}
         result = format_schedule(items, instructor_map, None, "2023-10-01")
-        self.assertIn("- 2023-10-01", result)
+        self.assertIn("- 2023-10-01 (Sun)", result)
         self.assertIn("  - 10:00 - 11:00 Instructor A 🟡🟡", result)
-        self.assertNotIn("- 2023-10-02", result)
+        self.assertNotIn("- 2023-10-02 (Sun)", result)
         self.assertNotIn("  - 12:00 - 13:00 Instructor B 🟡🟡🟡", result)
 
     def test_format_schedule_with_no_lessons(self):
