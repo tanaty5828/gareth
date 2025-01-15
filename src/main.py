@@ -29,9 +29,7 @@ bot = commands.Bot(
 JST = timezone(timedelta(hours=+9), "JST")
 
 scheduled_times = [
-    time(hour=10, tzinfo=JST),
     time(hour=12, tzinfo=JST),
-    time(hour=16, tzinfo=JST),
 ]
 
 
