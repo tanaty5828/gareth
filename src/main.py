@@ -83,12 +83,12 @@ def format_schedule(items, instructor_map, instructor_name_filter, date_filter):
     if date_filter:
         for date, lessons in schedule_info.items():
             if date == date_filter:
-                weekday = datetime.fromisoformat(date).strftime("%A")
+                weekday = datetime.fromisoformat(date).strftime("%a")
                 formatted_schedule.append(f"- {date} ({weekday})")
                 formatted_schedule.extend(lessons)
     else:
         for date, lessons in schedule_info.items():
-            weekday = datetime.fromisoformat(date).strftime("%A")
+            weekday = datetime.fromisoformat(date).strftime("%a")
             formatted_schedule.append(f"- {date} ({weekday})")
             formatted_schedule.extend(lessons)
 
