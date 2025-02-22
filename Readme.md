@@ -1,4 +1,4 @@
-# Discord Bot
+# Discord Bot :)
 
 This project is a Discord bot designed to manage schedules on a Discord server. The bot sends schedules at specified times and responds to user messages.
 
