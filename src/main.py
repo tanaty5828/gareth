@@ -40,6 +40,7 @@ intents.message_content = True
 TOKEN = os.getenv("DISCORD_TOKEN")
 SCHEDULE_URL = os.getenv("SCHEDULE_URL")
 INSTRUCTORS_URL = os.getenv("INSTRUCTORS_URL")
+IMAGE_URL = os.getenv("IMAGE_URL")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -53,9 +54,7 @@ bot = commands.Bot(
 JST = timezone(timedelta(hours=+9), "JST")
 
 scheduled_times = [
-    time(hour=10, tzinfo=JST),
     time(hour=12, tzinfo=JST),
-    time(hour=16, tzinfo=JST),
 ]
 
 
@@ -109,11 +108,13 @@ def format_schedule(items, instructor_map, instructor_name_filter, date_filter):
     if date_filter:
         for date, lessons in schedule_info.items():
             if date == date_filter:
-                formatted_schedule.append(f"- {date}")
+                weekday = datetime.fromisoformat(date).strftime("%a")
+                formatted_schedule.append(f"- {date} ({weekday})")
                 formatted_schedule.extend(lessons)
     else:
         for date, lessons in schedule_info.items():
-            formatted_schedule.append(f"- {date}")
+            weekday = datetime.fromisoformat(date).strftime("%a")
+            formatted_schedule.append(f"- {date} ({weekday})")
             formatted_schedule.extend(lessons)
 
     if len(formatted_schedule) == 0:
@@ -130,6 +131,12 @@ async def on_ready():
     print("Bot is ready!")
 
 
+async def send_image_with_probability(interaction, image_url, probability=0.3):
+    if random.random() < probability:
+        await interaction.followup.send(image_url)
+        logging.info("Image posted successfully")
+
+
 @bot.tree.command(
     name="otakebible",
     description="Send a random quote from Otake, usage: /otakebible",
@@ -144,11 +151,14 @@ async def otakebible(interaction: discord.Interaction):
         "ドライバーのシャフトバランスが悪いです",
         "ドライバーは3倍くらいフェース返していいです",
         "人差し指でグリップを受け止めてください",
+        "脳からの命令をすべて腕に集めてください",
+        "足を使わないほうが飛距離はでます"
     ]
     quote = random.choice(otake_quotes)
     try:
         await interaction.response.send_message(">>> 大竹「" + quote + "」")
         logging.info("Message posted successfully")
+        await send_image_with_probability(interaction, IMAGE_URL)
     except Exception as e:
         logging.error(f"Failed to reply to message: {e}")
 
